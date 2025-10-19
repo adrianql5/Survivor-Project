@@ -25,12 +25,14 @@ Mi lista de ideas no es (muy) conspiranoica, pero sí bastante útil y con un to
 
 - ¿Google caído? Con una copia local de Wikipedia puedes consultar cualquier cosa prácticamente.
 - Es el equivalente digital a llevar una biblioteca en tu mochila, pero sin que te duela la espalda.
+- Para visualizar el archivo se usa qwix
 
 ### 3. Un mapa mundial offline 🌍
 
 - Porque si tienes que buscar refugio, escapar de zombis (o simplemente encontrar el supermercado más cercano), un mapa mundial offline puede salvarte.
 - Además, así puedes impresionar a tus amigos diciendo: “Sé dónde estamos… y hacia dónde NO hay WiFi”.
 - Consejo: No lo he probado pero tengo la sensación de que no funciona como Google Maps y vas a tener que orientarte usando una brújula, por lo que sea.
+- Tras probarlo, el archivo de 100 GB pesa muchisimo y qgis desktop lo tira fatal, recomiendo descargarse los archivos por paises.
 
 ## ¿Y cómo se instala todo esto? 🚀
 
