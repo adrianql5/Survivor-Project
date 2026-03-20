@@ -1,57 +1,50 @@
-# SurvivorProject 🦙🌍📚
+# Survivor Project
 
-> *¿Qué harías si mañana el mundo se apaga?*  
-> Yo, por si acaso, ya tengo un plan.
+Proyecto personal para preparar un equipo Linux con varias herramientas que siguen siendo útiles si te quedas sin conexión: un modelo local con Ollama, una copia offline de Wikipedia y datos de OpenStreetMap para consulta local.
 
-## ¿Por qué existe este repositorio?
+## Contexto
 
-El 28 de abril de 2025 ocurrió un apagón en España. ¿Te imaginas quedarte sin internet, sin Google, sin reels? Así se me ocurrió la idea de este repositorio. Si el mundo se pone en modo “off”, mejor estar preparado.
+La idea salió después del apagón en España del 28 de abril de 2025. Más que plantearlo como un escenario apocalíptico, lo vi como una excusa para dejar montado un kit offline razonable en un portátil o en un disco externo.
 
-## ¿Qué herramientas necesitas para sobrevivir en modo offline? 🤔
+## Qué incluye
 
-Después de pasar un día cojonudo sin usar ningún elemento tecnológico, jugando al fútbol y bebiendo cañas, me pregunté:  
-**¿Qué necesito para sobrevivir si el apocalipsis digital vuelve?**
+- `Ollama` con el modelo `llama3.1:8b`.
+- Una copia de Wikipedia en formato `ZIM` para abrir con Kiwix.
+- Un volcado global de OpenStreetMap en formato `PBF` para cargarlo en QGIS.
 
-Mi lista de ideas no es (muy) conspiranoica, pero sí bastante útil y con un toque de humor:
+## Qué hace el script
 
-### 1. Ollama con el modelo Llama 3.1 🦙
+El script `survivorScript.sh`:
 
-- **Ollama** es una herramienta que permite ejecutar modelos de lenguaje grandes (LLMs) *en local*, sin necesidad de internet ni servidores mágicos en la nube.
-- **Llama 3.1** es uno de los modelos más potentes para tener conversaciones (en verdad es de los pocos que un portátil puede tirar), pedir ayuda, resolver dudas, y si tienes suerte, hasta te cuenta algún chiste malo.
-- En resumen: conviertes tu ordenador en una especie de “ChatGPT de bolsillo”, listo para responderte incluso si los satélites caen.
-- **IMPORTANTE**: Hay que tener en cuenta el hardware que tienes para instalar un modelo correcto. Normalmente necesitas el doble de RAM que lo que pide el modelo en la web de Ollama. Por ejemplo, si tienes 16GB de RAM, puedes ponerte el modelo: 8b, pero no el modelo: 64b, porque va a tardar cada prompt más que un lunes en llegar el viernes.
+- instala Ollama si no está disponible;
+- descarga el modelo `llama3.1:8b`;
+- instala `kiwix`, `qgis`, `curl` y `wget` usando `apt`;
+- prepara la estructura de carpetas en la ruta que indiques;
+- descarga los ficheros grandes para dejar el entorno listo.
 
-### 2. Descargar la Wikipedia 📚
+## Requisitos
 
-- ¿Google caído? Con una copia local de Wikipedia puedes consultar cualquier cosa prácticamente.
-- Es el equivalente digital a llevar una biblioteca en tu mochila, pero sin que te duela la espalda.
-- Para visualizar el archivo se usa qwix
+- Linux con `apt`.
+- Permisos de `sudo`.
+- Conexión a internet estable para la instalación inicial.
+- Al menos 200 GB libres si vas a bajar Wikipedia y el mapa mundial completos.
 
-### 3. Un mapa mundial offline 🌍
+## Uso
 
-- Porque si tienes que buscar refugio, escapar de zombis (o simplemente encontrar el supermercado más cercano), un mapa mundial offline puede salvarte.
-- Además, así puedes impresionar a tus amigos diciendo: “Sé dónde estamos… y hacia dónde NO hay WiFi”.
-- Consejo: No lo he probado pero tengo la sensación de que no funciona como Google Maps y vas a tener que orientarte usando una brújula, por lo que sea.
-- Tras probarlo, el archivo de 100 GB pesa muchisimo y qgis desktop lo tira fatal, recomiendo descargarse los archivos por paises.
+```bash
+chmod +x survivorScript.sh
+./survivorScript.sh
+```
 
-## ¿Y cómo se instala todo esto? 🚀
+El script preguntará en qué ruta quieres guardar los datos y pedirá confirmación antes de empezar las descargas pesadas.
 
-He creado un **script automático** que descarga todo lo necesario (Ollama + Llama 3.1 + Wikipedia + mapa mundial) de una tacada.  
-**SOLO FUNCIONA EN LINUX**.  
-Si usas Windows o macOS, tendrás que sobrevivir con tus propios recursos (o instalar Linux, que también es una forma de supervivencia).
+## Notas prácticas
 
-**OJO:** Se van a descargar sobre 200 GB de contenido, así que asegúrate de tener espacio libre o usa un disco externo.
+- La Wikipedia configurada en este repositorio es la versión completa en inglés sin imágenes.
+- El fichero global de OpenStreetMap ocupa mucho y QGIS no siempre lo mueve bien en equipos modestos. Si solo necesitas una zona concreta, suele tener más sentido descargar extractos por país o región.
+- El proyecto no resuelve la parte energética. Si el equipo no tiene batería o una forma de recargarse, el modo offline dura poco.
+- Las URLs de descarga pueden cambiar con el tiempo. Si alguna deja de funcionar, hay que actualizarla en el script.
 
----
+## Limitaciones
 
-## ¿Quieres probarlo?
-
-1. Clona este repositorio.
-2. Ejecuta el script `survivor_setup.sh` (solo en Linux).
-3. Disfruta con tus colegas y déjate de tanta pantalla.
-
----
-
-### Nota 
-
-Como primer consejo: busca una forma de cargar el ordenador porque si no vas a tener un buen pisapapeles.
+Esto no intenta ser una solución universal ni una herramienta especialmente pulida. Es un script personal para automatizar una preparación concreta en Linux y dejar reunidos varios recursos útiles en local.

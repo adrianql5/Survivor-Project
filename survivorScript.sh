@@ -1,60 +1,119 @@
-#!/bin/bash
-# Copyright (c) 2025 Adrián Quiroga Linares Lectura y referencia permitidas; reutilización y plagio prohibidos
+#!/usr/bin/env bash
 
+set -euo pipefail
 
-curl -fsSL https://ollama.com/install.sh | sh
-sleep 5
-
-if ! command -v ollama &>/dev/null; then
-  echo "Ollama no se instaló correctamente."
-  exit 1
-fi
-
-ollama pull llama3.1:8b
-echo "Ollama y el modelo llama3:8b están listos."
-
-sudo apt update
-sudo apt install -y kiwix qgis
-
-read -p "Introduce la ruta de tu disco externo (ejemplo: /media/usb): " USB_PATH
-
-mkdir -p "$USB_PATH/wikipedia"
-mkdir -p "$USB_PATH/maps"
-
-echo "Se van a descargar cerca de 200 GB en datos, asegurate de tener espacio libre suficiente"
-
+MODEL_NAME="llama3.1:8b"
 WIKI_URL="https://download.kiwix.org/zim/wikipedia/wikipedia_en_all_maxi_2025-08.zim"
-WIKI_DESC="Wikipedia EN (sin imágenes, texto completo, ~100GB)"
-
+WIKI_DESC="Wikipedia en ingles sin imagenes (~100 GB)"
 MAP_URL="https://planet.openstreetmap.org/pbf/planet-latest.osm.pbf"
-MAP_DESC="Mapa mundial completo OSM (~100GB)"
+MAP_DESC="Mapa mundial de OpenStreetMap (~100 GB)"
+DEFAULT_DATA_PATH="$HOME/survivor-data"
 
-if [ -n "$WIKI_URL" ]; then
-  echo "Descargando $WIKI_DESC ..."
-  wget -O "$USB_PATH/wikipedia/wikipedia.zim" "$WIKI_URL"
-else
-  echo "No se descargará Wikipedia: $WIKI_DESC"
-fi
+log() {
+  printf '%s\n' "$*"
+}
 
-if [ -n "$MAP_URL" ]; then
-  echo "Descargando $MAP_DESC ..."
-  wget -O "$USB_PATH/maps/map.osm.pbf" "$MAP_URL"
-else
-  echo "No se descargará mapa: $MAP_DESC"
-fi
+fail() {
+  printf 'Error: %s\n' "$*" >&2
+  exit 1
+}
 
-echo
-echo "=== INSTRUCCIONES DE USO ==="
-echo
-echo "1. Para consultar Wikipedia OFFLINE:"
-echo "   - Abre Kiwix desde el menú o ejecuta 'kiwix' en terminal."
-echo "   - Haz clic en 'Abrir archivo' y selecciona:"
-echo "     $USB_PATH/wikipedia/wikipedia.zim"
-echo
-echo "2. Para visualizar el mapa mundial/vectorial:"
-echo "   - Abre QGIS desde el menú o ejecuta 'qgis' en terminal."
-echo "   - Ve a 'Capa' > 'Añadir capa vectorial'."
-echo "   - Selecciona:"
-echo "     $USB_PATH/maps/map.osm.pbf"
-echo
-echo "¡Listo! Wikipedia y el mapa están preparados en tu disco externo según el espacio disponible."
+require_linux() {
+  [[ "$(uname -s)" == "Linux" ]] || fail "este script solo esta preparado para Linux."
+}
+
+require_command() {
+  command -v "$1" >/dev/null 2>&1 || fail "falta el comando '$1'."
+}
+
+install_ollama() {
+  if command -v ollama >/dev/null 2>&1; then
+    log "Ollama ya esta instalado."
+    return
+  fi
+
+  log "Instalando Ollama..."
+  curl -fsSL https://ollama.com/install.sh | sh
+
+  if ! command -v ollama >/dev/null 2>&1; then
+    fail "Ollama no se instalo correctamente."
+  fi
+}
+
+install_packages() {
+  require_command sudo
+  require_command apt
+
+  log "Instalando dependencias del sistema..."
+  sudo apt update
+  sudo apt install -y kiwix qgis curl wget
+}
+
+prompt_data_path() {
+  local input_path
+
+  read -r -p "Ruta donde guardar los datos [${DEFAULT_DATA_PATH}]: " input_path
+  DATA_PATH="${input_path:-$DEFAULT_DATA_PATH}"
+
+  mkdir -p "$DATA_PATH/wikipedia" "$DATA_PATH/maps"
+}
+
+confirm_large_downloads() {
+  local answer
+
+  log
+  log "Se van a descargar aproximadamente 200 GB en total."
+  log "Destino:"
+  log "  - Wikipedia: $DATA_PATH/wikipedia/wikipedia.zim"
+  log "  - Mapa:      $DATA_PATH/maps/map.osm.pbf"
+  log
+
+  read -r -p "Continuar con las descargas? [y/N]: " answer
+  case "$answer" in
+    y|Y|yes|YES|si|SI|s|S) ;;
+    *) fail "operacion cancelada por el usuario." ;;
+  esac
+}
+
+download_file() {
+  local url="$1"
+  local destination="$2"
+  local description="$3"
+
+  log "Descargando $description..."
+  wget -c -O "$destination" "$url"
+}
+
+print_next_steps() {
+  log
+  log "Archivos preparados en:"
+  log "  - $DATA_PATH/wikipedia/wikipedia.zim"
+  log "  - $DATA_PATH/maps/map.osm.pbf"
+  log
+  log "Uso rapido:"
+  log "  1. Abre Kiwix y carga el archivo de Wikipedia."
+  log "  2. Abre QGIS y anade el archivo .osm.pbf como capa vectorial."
+}
+
+main() {
+  require_linux
+  install_packages
+  require_command curl
+  require_command wget
+
+  install_ollama
+
+  log "Descargando el modelo $MODEL_NAME..."
+  ollama pull "$MODEL_NAME"
+  log "Modelo listo."
+
+  prompt_data_path
+  confirm_large_downloads
+
+  download_file "$WIKI_URL" "$DATA_PATH/wikipedia/wikipedia.zim" "$WIKI_DESC"
+  download_file "$MAP_URL" "$DATA_PATH/maps/map.osm.pbf" "$MAP_DESC"
+
+  print_next_steps
+}
+
+main "$@"
